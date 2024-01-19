@@ -1,4 +1,6 @@
 #![feature(test)]
+#![feature(portable_simd)]
+#![feature(iter_array_chunks)]
 
 mod levenstein;
 pub use crate::levenstein::*;
@@ -7,7 +9,7 @@ extern crate test;
 
 #[cfg(test)]
 mod tests {
-    use crate::{recursive, dynamic_wasteful, recursive_ascii_case_sens, dynamic_ascii_case_sensitive};
+    use crate::{recursive, dynamic_wasteful, recursive_ascii_case_sens, dynamic_ascii_case_sensitive, dynamic_simd_wasteful};
     use test::{Bencher, black_box};
 
     const BASIC_ASCII_TEST_CASES: [(&str, &str, usize); 5] = [
@@ -58,6 +60,16 @@ mod tests {
         }
     }
 
+    #[test]
+    fn dynamic_simd_wasteful_works() {
+        for (s1, s2, ans) in BASIC_ASCII_TEST_CASES {
+            assert_eq!(dynamic_simd_wasteful(s1, s2), ans);
+        }
+        for (s1, s2, ans) in FINNISH_ALPHABET_TEST_CASES {
+            assert_eq!(dynamic_simd_wasteful(s1, s2), ans);
+        }
+    }
+
     #[bench]
     #[ignore]
     fn bench_recursive(b: &mut Bencher) {
@@ -77,11 +89,19 @@ mod tests {
     }
 
     #[bench]
-    fn bench_dynamic(b: &mut Bencher) {
+    fn bench_dynamic_wasteful(b: &mut Bencher) {
         let s1 = "rasvakeitin";
         let s2 = "reissumies";
         assert_eq!(dynamic_wasteful(s1, s2), recursive(s1, s2));
         b.iter(|| dynamic_wasteful(black_box(s1), black_box(s2)));
+    }
+
+    #[bench]
+    fn bench_dynamic_simd_wasteful(b: &mut Bencher) {
+        let s1 = "rasvakeitin";
+        let s2 = "reissumies";
+        assert_eq!(dynamic_simd_wasteful(s1, s2), dynamic_wasteful(s1, s2));
+        b.iter(|| dynamic_simd_wasteful(black_box(s1), black_box(s2)));
     }
 
     const BENCH_LONG: (&str, &str) = (
@@ -90,14 +110,20 @@ mod tests {
     );
 
     #[bench]
-    fn bench_dynamic_long(b: &mut Bencher) {
+    fn bench_long_dynamic_wasteful(b: &mut Bencher) {
         let (s1, s2) = BENCH_LONG;
         b.iter(|| dynamic_wasteful(black_box(s1), black_box(s2)));
     }
 
     #[bench]
-    fn bench_dynamic_ascii_case_sens_long(b: &mut Bencher) {
+    fn bench_long_dynamic_ascii_case_sens(b: &mut Bencher) {
         let (s1, s2) = BENCH_LONG;
         b.iter(|| dynamic_ascii_case_sensitive(black_box(s1), black_box(s2)));
+    }
+
+    #[bench]
+    fn bench_long_dynamic_simd_wasteful(b: &mut Bencher) {
+        let (s1, s2) = BENCH_LONG;
+        b.iter(|| dynamic_simd_wasteful(black_box(s1), black_box(s2)));
     }
 }
