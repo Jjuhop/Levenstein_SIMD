@@ -1,5 +1,0 @@
-test tests::bench_dynamic                      ... bench:         337 ns/iter (+/- 7)
-test tests::bench_dynamic_ascii_case_sens_long ... bench:  16,742,969 ns/iter (+/- 305,975)
-test tests::bench_dynamic_long                 ... bench:  25,984,819 ns/iter (+/- 480,514)
-test tests::bench_dynamic_simd_wasteful        ... bench:         639 ns/iter (+/- 27)
-test tests::bench_dynamic_simd_wasteful_long   ... bench:  19,408,140 ns/iter (+/- 515,738)
